@@ -261,8 +261,8 @@ function _readFC21(data,  next) {
     const recordNumber = data.readUInt16BE(6);
     const length = data.readUInt16BE(8);
     const result = [];
-    for (let i = 10; i <= length + 10; i += 2) {
-        const reg = data.readUInt16BE(i);
+    for (let i = 10; i < length * 2 + 10; i++) {
+        const reg = data.readUInt8(i);
         result.push(reg);
     }
     if(next)
