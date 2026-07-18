@@ -250,6 +250,26 @@ function _readFC20(data,  next) {
 }
 
 /**
+ * Parse  the data fro Modbus -
+ * Write File Records
+ *
+ * @param {Buffer4} buffer
+ * @param {Function} next
+ */
+function _readFC21(data,  next) {
+    const fileNumber = data.readUInt16BE(4);
+    const recordNumber = data.readUInt16BE(6);
+    const length = data.readUInt16BE(8);
+    const result = [];
+    for (let i = 10; i < length + 10; i++) {
+        const reg = data.readUInt16BE(i);
+        result.push(reg);
+    }
+    if(next)
+        next(null, { "data": result, "length": length, "fileNumber": fileNumber, "recordNumber": recordNumber });
+}
+
+/**
  * Parse the data for a Modbus -
  * Mask Write Register (FC=22)
  *
@@ -592,9 +612,12 @@ function _onReceive(data) {
                 break;
             case 17:
                 _readFC17(data, next);
-                break;
+                break
             case 20:
                 _readFC20(data, transaction.next);
+                break;;
+            case 21:
+                _readFC21(data, transaction.next);
                 break;
             case 22:
                 _readFC22(data, next);
@@ -1208,6 +1231,49 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16BE(fileNumber, 4);
         buf.writeUInt16BE(recordNumber, 6);
         buf.writeUInt8(chunk, 9);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
+        _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+    }
+
+    /**
+     * Write a Modbus "Write File Records" (FC=21) to serial port
+     * @param {number} address the slave unit address.
+     * @param {Function} next;
+     */
+    writeFC21(address, fileNumber, recordNumber, data, next) {
+        if (this.isOpen !== true) {
+            if (next) next(new PortNotOpenError());
+            return;
+        }
+        // sanity check
+        if (typeof address === "undefined") {
+            if (next) next(new BadAddressError());
+            return;
+        }
+        const recordLength = data.length / 2;
+        const code = 21;
+        const codeLength = 9 + recordLength;
+        const reqeustDataLength = 7 + recordLength;
+
+        this._transactions[this._port._transactionIdWrite] = {
+            nextAddress: address,
+            nextCode: code,
+            lengthUnknown: true,
+            next: next
+        };
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        buf.writeUInt8(address, 0);
+        buf.writeUInt8(code, 1);
+        buf.writeUInt8(reqeustDataLength, 2);
+        buf.writeUInt8(6, 3); // ReferenceType
+        buf.writeUInt16BE(fileNumber, 4);
+        buf.writeUInt16BE(recordNumber, 6);
+        buf.writeUInt16BE(recordLength, 8);
+        let pos = 10;
+        for(const byte of data) {
+            buf.writeUInt8(byte, pos);
+            pos += 1;
+        }
         buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
