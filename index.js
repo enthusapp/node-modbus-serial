@@ -253,7 +253,7 @@ function _readFC20(data,  next) {
  * Parse  the data fro Modbus -
  * Write File Records
  *
- * @param {Buffer4} buffer
+ * @param {Buffer} buffer
  * @param {Function} next
  */
 function _readFC21(data,  next) {
@@ -1238,6 +1238,9 @@ class ModbusRTU extends EventEmitter {
     /**
      * Write a Modbus "Write File Records" (FC=21) to serial port
      * @param {number} address the slave unit address.
+     * @param {number} fileNumber the file number.
+     * @param {number} recordNumber the record number of file.
+     * @param {Buffer} data the data buffer to write.
      * @param {Function} next;
      */
     writeFC21(address, fileNumber, recordNumber, data, next) {
