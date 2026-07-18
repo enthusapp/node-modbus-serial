@@ -1270,7 +1270,7 @@ class ModbusRTU extends EventEmitter {
         const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
-        buf.writeUInt8(reqeustDataLength, 2);
+        buf.writeUInt8(requestDataLength, 2);
         buf.writeUInt8(6, 3); // ReferenceType
         buf.writeUInt16BE(fileNumber, 4);
         buf.writeUInt16BE(recordNumber, 6);
