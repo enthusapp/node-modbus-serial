@@ -1254,10 +1254,13 @@ class ModbusRTU extends EventEmitter {
             return;
         }
         const code = 21;
+        if (!data || data.length % 2 !== 0) {
+            if (next) next(new Error("Data length must be an even number of bytes"));
+            return;
+        }
         const codeLength = 10 + data.length;
-        const reqeustDataLength = 7 + data.length;
+        const requestDataLength = 7 + data.length;
         const recordLength = data.length / 2;
-
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
             nextCode: code,
