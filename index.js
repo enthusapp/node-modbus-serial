@@ -1255,8 +1255,8 @@ class ModbusRTU extends EventEmitter {
         }
         const recordLength = data.length / 2;
         const code = 21;
-        const codeLength = 9 + recordLength;
-        const reqeustDataLength = 7 + recordLength;
+        const codeLength = 10 + recordLength;
+        const reqeustDataLength = 8 + recordLength;
 
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
