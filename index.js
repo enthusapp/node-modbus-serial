@@ -261,7 +261,7 @@ function _readFC21(data,  next) {
     const recordNumber = data.readUInt16BE(6);
     const length = data.readUInt16BE(8);
     const result = [];
-    for (let i = 10; i < length + 10; i++) {
+    for (let i = 10; i <= length + 10; i += 2) {
         const reg = data.readUInt16BE(i);
         result.push(reg);
     }
@@ -1253,10 +1253,10 @@ class ModbusRTU extends EventEmitter {
             if (next) next(new BadAddressError());
             return;
         }
-        const recordLength = data.length / 2;
         const code = 21;
-        const codeLength = 10 + recordLength;
-        const reqeustDataLength = 8 + recordLength;
+        const codeLength = 10 + data.length;
+        const reqeustDataLength = 7 + data.length;
+        const recordLength = data.length / 2;
 
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
