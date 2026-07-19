@@ -612,7 +612,7 @@ function _onReceive(data) {
                 break;
             case 17:
                 _readFC17(data, next);
-                break
+                break;
             case 20:
                 _readFC20(data, transaction.next);
                 break;
